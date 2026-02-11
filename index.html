@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            
+            
+            
+        }
+        input, button {
+            font-size: 18px;
+            padding: 6px;
+            margin: 5px;
+        }
+        pre {
+            font-size: 20px;
+            background: #f4f4f4;
+            padding: 15px;
+            white-space: pre-line;
+            
+        }
+    </style>
+</head>
+<body>
+
+<h2>Multiplication Visualizer</h2>
+
+<input type="number" id="num1" placeholder="Enter first number">
+<input type="number" id="num2" placeholder="Enter second number">
+
+<br>
+<button onclick="showExpanded()">Show Expanded Method</button>
+<button onclick="showLong()">Show Long Multiplication</button>
+
+<pre id="output"></pre>
+
+<script>
+function showExpanded() {
+    let a = parseInt(document.getElementById("num1").value);
+    let b = parseInt(document.getElementById("num2").value);
+
+    if (isNaN(a) || isNaN(b)) {
+        output.textContent = "Please enter valid numbers.";
+        return;
+    }
+
+    let bStr = b.toString();
+
+    let expansions = [];
+    let partials = [];
+    let sum = 0;
+
+    let length = bStr.length;
+
+    for (let i = 0; i < length; i++) {
+        let digit = Number(bStr[i]);
+        let zeros = length - i - 1;
+
+        let placeValue = digit * Math.pow(10, zeros);
+
+        if (placeValue !== 0) {
+            expansions.push(`${a}×${placeValue}`);
+        }
+
+        let part = a * placeValue;
+        partials.push(part);
+        sum += part;
+    }
+
+    let out = "";
+    out += `${a} × ${b}\n`;
+    out += "= " + expansions.join(" + ") + "\n";
+    out += "= " + partials.join(" + ") + "\n";
+    out += "= " + sum;
+
+    output.textContent = out;
+}
+
+function showLong() {
+    let a = document.getElementById("num1").value;
+    let b = document.getElementById("num2").value;
+
+    if (a === "" || b === "") {
+        output.textContent = "Please enter valid numbers.";
+        return;
+    }
+
+    let A = BigInt(a);
+    let B = b.toString();
+
+    let lines = [];
+    let maxWidth = Math.max(a.length, b.length + 2);
+
+    lines.push(a.padStart(maxWidth));
+    lines.push(("× " + b).padStart(maxWidth));
+    lines.push("-".repeat(maxWidth));
+
+    let partials = [];
+    let shift = 0;
+
+    for (let i = B.length - 1; i >= 0; i--) {
+        let digit = BigInt(B[i]);
+        let part = (A * digit).toString() + "0".repeat(shift);
+        partials.push(part);
+        shift++;
+    }
+
+    let total = 0n;
+    for (let p of partials) total += BigInt(p);
+
+    let width = Math.max(
+        maxWidth,
+        ...partials.map(x => x.length),
+        total.toString().length
+    );
+
+    let out = "";
+    out += a.padStart(width) + "\n";
+    out += ("× " + b).padStart(width) + "\n";
+    out += "-".repeat(width) + "\n";
+
+    for (let p of partials) {
+        out += p.padStart(width) + "\n";
+    }
+
+    if (partials.length > 1) {
+        out += "-".repeat(width) + "\n";
+        out += total.toString().padStart(width);
+    }
+
+    output.textContent = out;
+}
+</script>
+
+</body>
+</html>
